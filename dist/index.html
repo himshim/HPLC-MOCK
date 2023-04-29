@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>HPLC Chromatogram</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<script src="https://cdn.plot.ly/plotly-2.2.0.min.js"></script>
+	<style>
+		body {
+			font-family: 'Roboto', sans-serif;
+			font-size: 16px;
+			margin: 0;
+			padding: 0;
+		}
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+		#plot {
+			height: 400px;
+			margin-bottom: 20px;
+		}
+		.footer {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			padding: 10px;
+			background-color: #f5f5f5;
+			text-align: center;
+			font-size: 12px;
+			color: #999;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>HPLC Chromatogram</h1>
+		<div id="plot"></div>
+
+		<div class="row">
+			<div class="col s12 m4">
+				<label>Retention Time:</label>
+				<div id="slider-retention-time"></div>
+			</div>
+			<div class="col s12 m4">
+				<label>Peak Intensity:</label>
+				<div id="slider-peak-intensity"></div>
+			</div>
+			<div class="col s12 m4">
+				<label>Tailing Factor:</label>
+				<div id="slider-tailing-factor"></div>
+			</div>
+		</div>
+
+		<button class="btn" onclick="downloadImage()">Download as JPEG</button>
+	</div>
+
+	<div class="footer">
+		Made by @himshim26
+	</div>
+
+	<script>
+		var retention_times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]; // Enter retention times here
+		var peak_intensities = [10, 30, 40, 60, 90, 100, 80, 70, 50, 20]; // Enter peak intensities here
+		var tailing_factors = [1.1, 1.2, 1.4, 1.6, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0]; // Enter tailing factors here
+
+		var trace1 = {
+			x: retention_times,
+			y: peak_intensities,
+			type: 'scatter',
+			mode: 'lines',
+			name: 'Peak Intensity',
+			line: {
+				color: 'black'
+			}
+		};
+
+		var trace2 = {
+			x: retention_times,
+			y: tailing_factors,
+			yaxis: 'y2',
+			type: 'scatter',
+			mode: 'lines',
+		
