@@ -1,56 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>HPLC Chromatogram Generator</title>
+	<title>HPLC Chromatogram Simulation</title>
 	<style>
-		canvas { 
-			border: 1px solid black; 
+		canvas {
+			border: 1px solid black;
 		}
 	</style>
 </head>
 <body>
-	<h1>HPLC Chromatogram Generator</h1>
-	
-	<form>
-		<label for="column">Column:</label>
-		<select name="column" id="column">
-			<option value="C18">C18</option>
-			<option value="C8">C8</option>
-			<option value="C4">C4</option>
-		</select>
-		<br>
-		
-		<label for="mobile-phase">Mobile Phase:</label>
-		<select name="mobile-phase" id="mobile-phase">
-			<option value="water-acetonitrile">Water-Acetonitrile</option>
-			<option value="water-methanol">Water-Methanol</option>
-			<option value="phosphate-buffered-saline">Phosphate Buffered Saline</option>
-		</select>
-		<br>
-		
-		<label for="gradient">Gradient:</label>
-		<input type="range" name="gradient" id="gradient" min="0" max="100" value="50">
-		<br>
-		
-		<label for="flow-rate">Flow Rate:</label>
-		<input type="number" name="flow-rate" id="flow-rate" step="0.1" value="1">
-		<label for="flow-rate">mL/min</label>
-		<br>
-		
-		<label for="injection-volume">Injection Volume:</label>
-		<input type="number" name="injection-volume" id="injection-volume" step="0.1" value="10">
-		<label for="injection-volume">µL</label>
-		<br>
-		
-		<input type="button" value="Generate Chromatogram" onclick="generateChromatogram()">
+	<h1>HPLC Chromatogram Simulation</h1>
+	<p>Enter the following parameters:</p>
+	<form onsubmit="return false;">
+		<label for="rt">Retention Time (min):</label>
+		<input type="number" id="rt" name="rt"><br><br>
+		<label for="bw">Bandwidth (sec):</label>
+		<input type="number" id="bw" name="bw"><br><br>
+		<label for="rs">Resolution:</label>
+		<input type="number" id="rs" name="rs"><br><br>
+		<label for="ht">Column Height (cm):</label>
+		<input type="number" id="ht" name="ht"><br><br>
+		<label for="wf">Wavelength (nm):</label>
+		<input type="number" id="wf" name="wf"><br><br>
+		<label for="tf">Tailing Factor:</label>
+		<input type="number" id="tf" name="tf"><br><br>
+		<label for="asym">Peak Asymmetry:</label>
+		<input type="number" id="asym" name="asym"><br><br>
+		<label for="n">Theoretical Plates:</label>
+		<input type="number" id="n" name="n"><br><br>
+		<button onclick="plot()">Plot Chromatogram</button>
+		<button onclick="download()">Download Image</button>
 	</form>
-	
 	<br>
-	
-	<canvas id="chromatogram" width="800" height="600">
-		Your browser does not support the HTML5 canvas tag.
-	</canvas>
+	<div id="canvas-container">
+		<canvas id="canvas" width="800" height="400"></canvas>
+	</div>
+	<script>
+		function plot() {
+			var rt = document.getElementById("rt").value;
+			var bw = document.getElementById("bw").value;
+			var rs = document.getElementById("rs").value;
+			var ht = document.getElementById("ht").value;
+			var wf = document.getElementById("wf").value;
+			var tf = document.getElementById("tf").value;
+			var asym = document.getElementById("asym").value;
+			var n = document.getElementById("n").value;
 
-	<script src="chromatogram.js"></script>
+			var canvas = document.getElementById("canvas");
+			var ctx = canvas.getContext("2d");
+
+			// Plot baseline
+			ctx.beginPath();
+			ctx.moveTo(0, 350);
+			ctx.lineTo(800, 350);
+			ctx.stroke();
+
+			// Plot peaks
+			var peakWidth = bw / 60 * 100;
+			var peakSpacing = peakWidth / rs;
+			var peakHeight = ht / rs;
+			var peakStart = 50;
+			var peakEnd = peakStart + peakWidth;
+			var wavelength = wf;
+			var peakAmplitude = 5000;
+
+			for (var i = 0; i < rs; i++) {
+				ctx.beginPath();
+				ctx.moveTo(peakStart, 350);
+				ctx.bezierCurveTo(
+					peakStart + peakWidth / 3 * (1+asym/100), 350 - peakHeight / 2,
+					peakEnd - peakWidth / 3 * (1-asym/100), 350 - peakHeight / 2,
+					peakEnd, 350 - peakHeight * tf / 100
+				);
+				ctx.strokeStyle = "rgb(" + wavelength + ", 0, 0)";
+				ctx.lineWidth = 2;
+				ctx.stroke();
+
+				// Calculate theoretical plates and peak efficiency
+				var L = ht;
+				var d = peakWidth / 100;
+				var As = 1 / Math.sqrt(Math.pow(2, 1/n) - 1/2);
+				var N = 16 * Math.pow((5.545 + As * tf/100), 2) * Math.pow(d, 2) * L / Math.pow(rt/60, 2);
+				var efficiency = 5.54 * Math.pow(rt/60, 2) / (n * d);
+
+				var text = "Wavelength: " + wavelength + " nm\nRetention Time: " + rt + " min\nBandwidth: " + bw + " s\nResolution: " + rs + "\nColumn Height: " + ht + " cm\nTailing Factor: " + tf + "\nAsymmetry: " + asym + "\nTheoretical Plates: " + N.toFixed(0) + "\nEfficiency: " + efficiency.toFixed(0) + " plates/m";
+
+				ctx.font = "12px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText(text, peakStart, 370);
+
+				peakStart += peakSpacing;
+				peakEnd += peakSpacing;
+				wavelength += 10;
+				peakAmplitude -= 1000;
+			}
+		}
+
+		function download() {
+			var canvas = document.getElementById("canvas");
+			var link = document.createElement("a");
+
+			link.download = "chromatogram.jpg";
+			link.href = canvas.toDataURL("image/jpeg", 1.0);
+			link.click();
+		}
+	</script>
 </body>
 </html>
