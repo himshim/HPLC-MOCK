@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+  <div id="plot"></div>
+  <div>
+    <form>
+      <label for="retention-time">Retention Time:</label>
+      <input type="range" min="0" max="10" step="0.1" value="5" id="retention-time">
+      <br>
+      <label for="peak-intensity">Peak Intensity:</label>
+      <input type="range" min="0" max="300" step="10" value="150" id="peak-intensity">
+      <br>
+      <label for="tailing-factor">Tailing Factor:</label>
+      <input type="range" min="0" max="1" step="0.05" value="0.2" id="tailing-factor">
+    </form>
+    <button onclick="updatePlot()">Update Plot</button>
+    <button onclick="downloadImage()">Download as JPEG</button>
+  </div>
+  <script>
+    // Define initial data for chromatogram
+    var initial_data = {
+      x: [1.0, 2.0, 3.0, 4.0, 5.0], // retention time
+      y: [100, 150, 200, 250, 150], // peak intensity
+      type: 'scatter',
+      mode: 'lines+markers',
+      line: {
+        color: 'blue'
+      }
+    };
+
+    // Define layout for chromatogram
+    var layout = {
+      title: 'HPLC Chromatogram',
+      xaxis: {
+        title: 'Retention Time (min)'
+      },
+      yaxis: {
+        title: 'Peak Intensity'
+      }
+    };
+
+    // Define initial data for double peak chromatogram
+    var initial_data2 = {
+      x: [1.0, 2.0, 3.0, 4.0, 5.0], // retention time
+      y: [100, 150, 200, 250, 150], // peak intensity
+      type: 'scatter',
+      mode: 'lines+markers',
+      line: {
+        color: 'red'
+      }
+    };
+
+    // Add second peak for double peak chromatogram
+    var second_peak = {
+      x: [2.8, 3.5],
+      y: [130, 190],
+      type: 'scatter',
+      mode: 'markers',
+      marker: {
+        color: 'red',
+        symbol: 'circle',
+        size: 10
+      }
+    };
+
+    // Combine data for double peak chromatogram
+    var initial_data2 = [initial_data2, second_peak];
+
+    // Define layout for double peak chromatogram
+    var layout2 = {
+      title: 'Double Peak HPLC Chromatogram',
+      xaxis: {
+        title: 'Retention Time (min)'
+      },
+      yaxis: {
+        title: 'Peak Intensity'
+      }
+    };
+
+    // Create plots
+    var plot = Plotly.newPlot('plot', [initial_data], layout);
+    var plot2 = Plotly.newPlot('plot2', initial_data2, layout2);
+
+    // Update plot based on slider values
+    function updatePlot() {
+      // Get slider values
+      var retention_time = document
