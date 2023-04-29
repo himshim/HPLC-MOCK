@@ -1,74 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<title>HPLC Chromatogram Plotter</title>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-  <div id="plot"></div>
-  <script>
-    // Define data for chromatogram
-    var trace = {
-      x: [1.0, 2.0, 3.0, 4.0, 5.0], // retention time
-      y: [100, 150, 200, 250, 150], // peak intensity
-      type: 'scatter',
-      mode: 'lines+markers',
-      line: {
-        color: 'blue'
-      }
-    };
+	<div>
+		<label for="retention-time-slider">Retention Time:</label>
+		<input type="range" min="0" max="100" value="50" class="slider" id="retention-time-slider">
 
-    // Define layout for chromatogram
-    var layout = {
-      title: 'HPLC Chromatogram',
-      xaxis: {
-        title: 'Retention Time (min)'
-      },
-      yaxis: {
-        title: 'Peak Intensity'
-      }
-    };
+		<label for="peak-intensity-slider">Peak Intensity:</label>
+		<input type="range" min="0" max="100" value="50" class="slider" id="peak-intensity-slider">
 
-    // Define data for double peak chromatogram
-    var trace2 = {
-      x: [1.0, 2.0, 3.0, 4.0, 5.0], // retention time
-      y: [100, 150, 200, 250, 150], // peak intensity
-      type: 'scatter',
-      mode: 'lines+markers',
-      line: {
-        color: 'red'
-      }
-    };
+		<label for="tailing-factor-slider">Tailing Factor:</label>
+		<input type="range" min="0" max="100" value="50" class="slider" id="tailing-factor-slider">
+	</div>
 
-    // Add second peak for double peak chromatogram
-    var second_peak = {
-      x: [2.8, 3.5],
-      y: [130, 190],
-      type: 'scatter',
-      mode: 'markers',
-      marker: {
-        color: 'red',
-        symbol: 'circle',
-        size: 10
-      }
-    };
+	<div id="plot"></div>
 
-    // Combine data for double peak chromatogram
-    var data2 = [trace2, second_peak];
+	<script>
+		var retention_time_slider = document.getElementById("retention-time-slider");
+		var peak_intensity_slider = document.getElementById("peak-intensity-slider");
+		var tailing_factor_slider = document.getElementById("tailing-factor-slider");
 
-    // Define layout for double peak chromatogram
-    var layout2 = {
-      title: 'Double Peak HPLC Chromatogram',
-      xaxis: {
-        title: 'Retention Time (min)'
-      },
-      yaxis: {
-        title: 'Peak Intensity'
-      }
-    };
+		var data = [
+			{
+				x: [0, retention_time_slider.value, retention_time_slider.value, retention_time_slider.value + tailing_factor_slider.value],
+				y: [0, 0, peak_intensity_slider.value, 0],
+				type: 'scatter',
+				mode: 'lines+markers',
+				fill: 'tozeroy',
+				line: {
+					color: 'blue'
+				}
+			}
+		];
 
-    // Create plots
-    Plotly.newPlot('plot', [trace], layout);
-    Plotly.newPlot('plot2', data2, layout2);
-  </script>
+		var layout = {
+			title: 'HPLC Chromatogram',
+			xaxis: {
+				title: 'Retention Time (min)'
+			},
+			yaxis: {
+				title: 'Intensity'
+			}
+		};
+
+		Plotly.newPlot('plot', data, layout);
+
+		retention_time_slider.oninput = function() {
+			data[0].x[1] = this.value;
+			data[0].x[2] = this.value;
+			data[0].x[3] = parseFloat(this.value) + parseFloat(tailing_factor_slider.value);
+
+			Plotly.react('plot', data, layout);
+		}
+
+		peak_intensity_slider.oninput = function() {
+			data[0].y[2] = this.value;
+
+			Plotly.react('plot', data, layout);
+		}
+
+		tailing_factor_slider.oninput = function() {
+			data[0].x[3] = parseFloat(retention_time_slider.value) + parseFloat(this.value);
+
+			Plotly.react('plot', data, layout);
+		}
+	</script>
 </body>
 </html>
