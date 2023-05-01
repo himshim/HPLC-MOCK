@@ -1,72 +1,82 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Real-time HPLC Chromatogram Plotting</title>
+  <head>
+    <title>Mock HPLC Chromatograms</title>
+    <!-- Add plotly.js library -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
-    <div>
-        <label for="retention-time">Retention Time (min): </label>
-        <input type="number" id="retention-time" min="0" step="0.1" value="0">
-    </div>
-    <div>
-        <label for="peak-height">Peak Height: </label>
-        <input type="number" id="peak-height" min="0" step="0.1" value="0">
-    </div>
-    <div>
-        <label for="tailing-factor">Tailing Factor: </label>
-        <input type="number" id="tailing-factor" min="0" step="0.1" value="0">
-    </div>
+    <!-- Add custom CSS styles -->
+    <style>
+      #plot {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Mock HPLC Chromatograms</h1>
     <div id="plot"></div>
+    <!-- Add script to generate plot -->
+  <script>
+    // Define user input variables
+    var retention_time1 = 10;
+    var retention_time2 = 15;
+    var peak_height1 = 50;
+    var peak_height2 = 75;
+    var retention_factor1 = 1.2;
+    var retention_factor2 = 1.5;
 
-    <script>
-        // Get user inputs
-        var retentionTimeInput = document.getElementById('retention-time');
-        var peakHeightInput = document.getElementById('peak-height');
-        var tailingFactorInput = document.getElementById('tailing-factor');
+    // Generate data for double-peak chromatogram
+    var xValues = [];
+    var yValues = [];
+    var peak1 = [];
+    var peak2 = [];
+    for (var i = 0; i <= 25; i += 0.1) {
+        xValues.push(i);
+        peak1.push(peak_height1 * Math.exp(-0.5 * Math.pow((i - retention_time1) / retention_factor1, 2)));
+        peak2.push(peak_height2 * Math.exp(-0.5 * Math.pow((i - retention_time2) / retention_factor2, 2)));
+        yValues.push(peak1[i*10] + peak2[i*10]);
+    }
 
-        // Define initial data
-        var data = [{
-            x: [0, retentionTimeInput.value, retentionTimeInput.value, retentionTimeInput.value+(0.1*tailingFactorInput.value)],
-            y: [0, 0, peakHeightInput.value, 0],
-            type: 'scatter'
-        }];
+    // Define plot layout and trace
+    var layout = {
+        title: 'Double-Peak Chromatogram',
+        xaxis: {
+            title: 'Retention Time (min)',
+            range: [0, 25],
+            dtick: 5
+        },
+        yaxis: {
+            title: 'Peak Height (mAU)',
+            range: [0, 100]
+        },
+        margin: {
+            l: 40,
+            r: 40,
+            b: 40,
+            t: 80
+        },
+        showlegend: false
+    };
 
-        // Define layout
-        var layout = {
-            xaxis: {
-                title: 'Retention Time (min)',
-                range: [0, retentionTimeInput.value + (0.1 * tailingFactorInput.value)]
-            },
-            yaxis: {
-                title: 'Detector Response (AU)',
-                range: [0, peakHeightInput.value * 1.1]
-            },
-            title: 'HPLC Chromatogram'
-        };
+    var trace = {
+        x: xValues,
+        y: yValues,
+        type: 'scatter',
+        mode: 'lines',
+        line: {
+            color: 'blue',
+            width: 2
+        }
+    };
 
-        // Plot initial graph
-        Plotly.newPlot('plot', data, layout);
+    // Create plot
+    var data = [trace];
+    Plotly.newPlot('plot', data, layout);
+</script>
 
-        // Update graph on user input
-        retentionTimeInput.addEventListener('input', function() {
-            data[0].x[1] = retentionTimeInput.value;
-            data[0].x[2] = retentionTimeInput.value;
-            data[0].x[3] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
-            Plotly.redraw('plot');
-        });
+  </body>
+</html>
 
-        peakHeightInput.addEventListener('input', function() {
-            data[0].y[2] = peakHeightInput.value;
-            layout.yaxis.range[1] = peakHeightInput.value * 1.1;
-            Plotly.redraw('plot');
-        });
-
-        tailingFactorInput.addEventListener('input', function() {
-            data[0].x[3] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
-            layout.xaxis.range[1] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
-            Plotly.redraw('plot');
-        });
     </script>
 </body>
 </html>
