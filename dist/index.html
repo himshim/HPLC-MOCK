@@ -1,72 +1,72 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>HPLC Chromatogram Plotter</title>
-	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Real-time HPLC Chromatogram Plotting</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-	<div>
-		<label for="retention-time-slider">Retention Time:</label>
-		<input type="range" min="0" max="100" value="50" class="slider" id="retention-time-slider">
+    <div>
+        <label for="retention-time">Retention Time (min): </label>
+        <input type="number" id="retention-time" min="0" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="peak-height">Peak Height: </label>
+        <input type="number" id="peak-height" min="0" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="tailing-factor">Tailing Factor: </label>
+        <input type="number" id="tailing-factor" min="0" step="0.1" value="0">
+    </div>
+    <div id="plot"></div>
 
-		<label for="peak-intensity-slider">Peak Intensity:</label>
-		<input type="range" min="0" max="100" value="50" class="slider" id="peak-intensity-slider">
+    <script>
+        // Get user inputs
+        var retentionTimeInput = document.getElementById('retention-time');
+        var peakHeightInput = document.getElementById('peak-height');
+        var tailingFactorInput = document.getElementById('tailing-factor');
 
-		<label for="tailing-factor-slider">Tailing Factor:</label>
-		<input type="range" min="0" max="100" value="50" class="slider" id="tailing-factor-slider">
-	</div>
+        // Define initial data
+        var data = [{
+            x: [0, retentionTimeInput.value, retentionTimeInput.value, retentionTimeInput.value+(0.1*tailingFactorInput.value)],
+            y: [0, 0, peakHeightInput.value, 0],
+            type: 'scatter'
+        }];
 
-	<div id="plot"></div>
+        // Define layout
+        var layout = {
+            xaxis: {
+                title: 'Retention Time (min)',
+                range: [0, retentionTimeInput.value + (0.1 * tailingFactorInput.value)]
+            },
+            yaxis: {
+                title: 'Detector Response (AU)',
+                range: [0, peakHeightInput.value * 1.1]
+            },
+            title: 'HPLC Chromatogram'
+        };
 
-	<script>
-		var retention_time_slider = document.getElementById("retention-time-slider");
-		var peak_intensity_slider = document.getElementById("peak-intensity-slider");
-		var tailing_factor_slider = document.getElementById("tailing-factor-slider");
+        // Plot initial graph
+        Plotly.newPlot('plot', data, layout);
 
-		var data = [
-			{
-				x: [0, retention_time_slider.value, retention_time_slider.value, retention_time_slider.value + tailing_factor_slider.value],
-				y: [0, 0, peak_intensity_slider.value, 0],
-				type: 'scatter',
-				mode: 'lines+markers',
-				fill: 'tozeroy',
-				line: {
-					color: 'blue'
-				}
-			}
-		];
+        // Update graph on user input
+        retentionTimeInput.addEventListener('input', function() {
+            data[0].x[1] = retentionTimeInput.value;
+            data[0].x[2] = retentionTimeInput.value;
+            data[0].x[3] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
+            Plotly.redraw('plot');
+        });
 
-		var layout = {
-			title: 'HPLC Chromatogram',
-			xaxis: {
-				title: 'Retention Time (min)'
-			},
-			yaxis: {
-				title: 'Intensity'
-			}
-		};
+        peakHeightInput.addEventListener('input', function() {
+            data[0].y[2] = peakHeightInput.value;
+            layout.yaxis.range[1] = peakHeightInput.value * 1.1;
+            Plotly.redraw('plot');
+        });
 
-		Plotly.newPlot('plot', data, layout);
-
-		retention_time_slider.oninput = function() {
-			data[0].x[1] = this.value;
-			data[0].x[2] = this.value;
-			data[0].x[3] = parseFloat(this.value) + parseFloat(tailing_factor_slider.value);
-
-			Plotly.react('plot', data, layout);
-		}
-
-		peak_intensity_slider.oninput = function() {
-			data[0].y[2] = this.value;
-
-			Plotly.react('plot', data, layout);
-		}
-
-		tailing_factor_slider.oninput = function() {
-			data[0].x[3] = parseFloat(retention_time_slider.value) + parseFloat(this.value);
-
-			Plotly.react('plot', data, layout);
-		}
-	</script>
+        tailingFactorInput.addEventListener('input', function() {
+            data[0].x[3] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
+            layout.xaxis.range[1] = retentionTimeInput.value + (0.1 * tailingFactorInput.value);
+            Plotly.redraw('plot');
+        });
+    </script>
 </body>
 </html>
