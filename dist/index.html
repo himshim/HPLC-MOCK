@@ -2,8 +2,8 @@
 <html>
   <head>
     <title>Mock HPLC Chromatograms</title>
-    <!-- Add plotly.js library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Add Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Add custom CSS styles -->
     <style>
       #plot {
@@ -14,32 +14,74 @@
   </head>
   <body>
     <h1>Mock HPLC Chromatograms</h1>
-    <div id="plot"></div>
+    <canvas id="plot"></canvas>
     <!-- Add script to generate plot -->
-  <script>
-    // Define user input variables
-    var retention_time1 = 10;
-    var retention_time2 = 15;
-    var peak_height1 = 50;
-    var peak_height2 = 75;
-    var retention_factor1 = 1.2;
-    var retention_factor2 = 1.5;
+    <script>
+      // Define user input variables
+      var retention_time1 = 10;
+      var retention_time2 = 15;
+      var peak_height1 = 50;
+      var peak_height2 = 75;
+      var retention_factor1 = 1.2;
+      var retention_factor2 = 1.5;
 
-    // Generate data for double-peak chromatogram
-    var xValues = [];
-    var yValues = [];
-    var peak1 = [];
-    var peak2 = [];
-    for (var i = 0; i <= 25; i += 0.1) {
-        xValues.push(i);
-        peak1.push(peak_height1 * Math.exp(-0.5 * Math.pow((i - retention_time1) / retention_factor1, 2)));
-        peak2.push(peak_height2 * Math.exp(-0.5 * Math.pow((i - retention_time2) / retention_factor2, 2)));
-        yValues.push(peak1[i*10] + peak2[i*10]);
-    }
+      // Generate data for double-peak chromatogram
+      var xValues = [];
+      var yValues = [];
+      var peak1 = [];
+      var peak2 = [];
+      for (var i = 0; i <= 25; i += 0.1) {
+          xValues.push(i);
+          peak1.push(peak_height1 * Math.exp(-0.5 * Math.pow((i - retention_time1) / retention_factor1, 2)));
+          peak2.push(peak_height2 * Math.exp(-0.5 * Math.pow((i - retention_time2) / retention_factor2, 2)));
+          yValues.push(peak1[i*10] + peak2[i*10]);
+      }
 
-    // Define plot layout and trace
-    var layout = {
-        title: 'Double-Peak Chromatogram',
+      // Create Chart.js chart
+      var ctx = document.getElementById('plot').getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: xValues,
+          datasets: [{
+            label: 'Double-Peak Chromatogram',
+            data: yValues,
+            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Retention Time (min)'
+              },
+              ticks: {
+                beginAtZero: true,
+                stepSize: 5,
+                max: 25
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'Peak Height (mAU)'
+              },
+              ticks: {
+                beginAtZero: true,
+                stepSize: 20,
+                max: 100
+              }
+            }]
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+
         xaxis: {
             title: 'Retention Time (min)',
             range: [0, 25],
